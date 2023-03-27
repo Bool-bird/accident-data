@@ -1,9 +1,10 @@
 import requests
 
-serviceKey = "SSViRnA2wdqrMhE6gLVMdjBl6%2FYXNYADYJTlWSvIDLj9hb4RDasyNSx2S250bZRkGhxsG0NT%2FAgLmlQD2ziLeg%3D%3D"
+url = 'https://www.csi.go.kr/acd/acdCaseList.do'  # 가져올 페이지의 URL
+response = requests.get(url)  # GET 요청을 보내서 페이지 내용 가져오기
 
-url = 'http://apis.data.go.kr/B552016/FacilAccidentService/getFacilAccidentList'
-params ={'serviceKey' : serviceKey, 'numOfRows' : '1', 'pageNo' : '1', 'type' : 'json', 'accdntNm' : '2680번 교', 'facilNm' : '2680번 교', 'facilAddr' : '버지니아주' }
-
-response = requests.get(url, params=params)
-print(response.content)
+if response.status_code == 200:  # HTTP 응답 코드가 200인 경우(정상적인 응답)
+    html = response.text  # HTML 코드 추출
+    print(html)  # 추출한 HTML 코드 출력
+else:
+    print('Error:', response.status_code)  # 오류 메시지 출력
