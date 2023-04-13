@@ -122,12 +122,22 @@ def extract_cost(data_str):
 
 # 날짜 수 세기 함수
 def count_days(date_string):
-    date_str = date_string.split('(해당공종')[0].strip()
+    date_str = date_string.split('(해당공종 :')[0].strip()
 
-    start_date = date_str.split(' ~ ')[0]
-    end_date = date_str.split(' ~ ')[-1]
-    start_date = parser.parse(start_date)
-    end_date = parser.parse(end_date)
+    str_arr = date_str.split(' ~ ')
+    start_date_str = str_arr[0]
+    end_date_str = str_arr[1]
+    start_date = parser.parse(start_date_str)
+    end_date = parser.parse(end_date_str)
+    if (end_date - start_date).days <= 0:
+        sub_date = date_string.split('(해당공종 :')[1].strip()
+        sub_date_str = sub_date.split(')')[0].strip()
+
+        str_arr = sub_date_str.split(' ~ ')
+        start_date_str = str_arr[0]
+        end_date_str = str_arr[1]
+        start_date = parser.parse(start_date_str)
+        end_date = parser.parse(end_date_str)
 
     return (end_date - start_date).days
 
