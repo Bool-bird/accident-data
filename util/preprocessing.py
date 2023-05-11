@@ -122,24 +122,27 @@ def extract_cost(data_str):
 
 # 날짜 수 세기 함수
 def count_days(date_string):
-    date_str = date_string.split('(해당공종 :')[0].strip()
+    try:
+        date_str = date_string.split('(해당공종 :')[0].strip()
 
-    str_arr = date_str.split(' ~ ')
-    start_date_str = str_arr[0]
-    end_date_str = str_arr[1]
-    start_date = parser.parse(start_date_str)
-    end_date = parser.parse(end_date_str)
-    if (end_date - start_date).days <= 0:
-        sub_date = date_string.split('(해당공종 :')[1].strip()
-        sub_date_str = sub_date.split(')')[0].strip()
-
-        str_arr = sub_date_str.split(' ~ ')
+        str_arr = date_str.split(' ~ ')
         start_date_str = str_arr[0]
         end_date_str = str_arr[1]
         start_date = parser.parse(start_date_str)
         end_date = parser.parse(end_date_str)
+        if (end_date - start_date).days <= 0:
+            sub_date = date_string.split('(해당공종 :')[1].strip()
+            sub_date_str = sub_date.split(')')[0].strip()
 
-    return (end_date - start_date).days
+            str_arr = sub_date_str.split(' ~ ')
+            start_date_str = str_arr[0]
+            end_date_str = str_arr[1]
+            start_date = parser.parse(start_date_str)
+            end_date = parser.parse(end_date_str)
+
+        return (end_date - start_date).days
+    except:
+        pass
 
 # 피해규모 계산 함수
 def calc_damage_scale(df):
@@ -147,6 +150,37 @@ def calc_damage_scale(df):
     # + 0.1 * np.sqrt(df['피해금액'])
     return damages_scale
 # CSV 파일을 DataFrame으로 읽어오기
+
+import pandas as pd
+
+def calculate_safety_ratios(df):
+    # 전체 안전사고 발생 건수
+    total_accidents = len(df)
+    
+    # 공종별 안전사고 발생 건수
+    group_accidents = df.groupby('공종')['공종'].count().reset_index(name='공종별 안전사고 발생 건수')
+    
+    # 공종별 안전사고 발생 비율
+    group_accidents['공종별 안전사고 발생 비율'] = group_accidents['공종별 안전사고 발생 건수'] / total_accidents * 100
+    
+    # 공종별 사망자 비율
+    group_fatalities = df.groupby('공종')['사망자수(명)'].sum().reset_index(name='공종별 사망자수')
+    group_fatalities['공종별 사망자 비율'] = group_fatalities['공종별 사망자수'] / group_fatalities['공종별 사망자수'].sum() * 100
+    
+    # 공종별 부상자 비율
+    group_injuries = df.groupby('공종')['부상자수(명)'].sum().reset_index(name='공종별 부상자수')
+    group_injuries['공종별 부상자 비율'] = group_injuries['공종별 부상자수'] / group_injuries['공종별 부상자수'].sum() * 100
+    
+    # 공종별 안전사고 발생강도 비율
+    group_accident_intensity = pd.merge(group_fatalities, group_injuries, on='공종')
+    group_accident_intensity['공종별 안전사고 발생강도 비율'] = group_accident_intensity['공종별 사망자 비율'] * 3 + group_accident_intensity['공종별 부상자 비율']
+    
+    # 공종별 위험도 평가지수
+    group_safety_index = pd.merge(group_accidents, group_accident_intensity, on='공종')
+    group_safety_index['공종별 위험도 평가지수'] = group_safety_index['공종별 안전사고 발생 비율'] + group_safety_index['공종별 안전사고 발생강도 비율']
+    
+    return group_safety_index
+
 
 # 공종에서 중분류만 추출하는 함수
 def extract_middle_class(s):
