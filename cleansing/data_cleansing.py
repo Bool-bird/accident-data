@@ -6,7 +6,7 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.compose import ColumnTransformer
-from util.preprocessing import parse_num_of_people, extract_month, extract_facility, extract_ratio, extract_population, extract_cost, calc_damage_scale, extract_middle_class, str_to_median, count_days
+from util.preprocessing import parse_num_of_people, extract_month, extract_facility, extract_ratio, extract_population, extract_cost, calc_damage_scale, extract_middle_class, str_to_median, count_days, extract_sago
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import OneSidedSelection, EditedNearestNeighbours
 
@@ -25,7 +25,6 @@ def preprocess_data():
     df['공종'] = df['공종'].apply(extract_middle_class)
 
     #범주형 데이터를 수치형 데이터로 인코딩
-
     df['사망자수(명)'] = df['사망자수(명)'].apply(parse_num_of_people)
     df['부상자수(명)'] = df['부상자수(명)'].apply(parse_num_of_people)
     df['발생일시'] = df['발생일시'].apply(extract_month)
@@ -40,6 +39,7 @@ def preprocess_data():
     df[['날씨', '기온', '습도']] = df['기상상태'].str.extract('날씨 : (\S+)기온 : (\d+)℃습도 : (\d+)%')
     df = df.drop(['기상상태'], axis=1)
 
+    df[['사망사고', '부상사고', '재산피해', '기타']] = df.apply(extract_sago)
     df = df.dropna()
 
     le = LabelEncoder()
