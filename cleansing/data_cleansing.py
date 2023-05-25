@@ -84,4 +84,52 @@ def preprocess_data():
 
     return X_train, X_test, y_train, y_test
 
-preprocess_data()
+def preprocess_data_only_construction_type():
+    df = pd.read_csv('../data/output-v2.csv')
+    #필요 없는 특성 제거
+
+    allColumns = df.columns
+    params = ['사망자수(명)', '부상자수(명)', '공종']
+
+    df = df.drop(allColumns.drop(params), axis=1)
+
+    df = df.dropna()
+
+    df['공종'] = df['공종'].apply(extract_middle_class)
+
+    #범주형 데이터를 수치형 데이터로 인코딩
+    safety_ratio_by_job = calculate_safety_ratios(df)
+    safety_ratio_by_job = safety_ratio_by_job.drop(['공종별 안전사고 발생 비율', '공종별 사망자 비율', '공종별 부상자 비율', '공종별 안전사고 발생강도 비율', '공종별 안전사고 발생 건수', '공종별 사망자수', '공종별 부상자수'], axis=1)
+    df = pd.merge(df, safety_ratio_by_job, on='공종', how='inner')
+    df['피해규모'] = df.apply(calc_damage_scale, axis=1)
+
+    df = df.dropna()
+
+    # 시설물 종류 특성을 원-핫 인코딩
+
+    ct = ColumnTransformer([
+    ('onehot', OneHotEncoder(sparse=False), ['공종'])], remainder='passthrough'
+    )
+    ct.fit(df)
+    X = ct.transform(df)
+    # 컬럼 이름 리스트 생성
+
+    num_cols = df.columns.tolist()
+    ohe = ct.named_transformers_['onehot']
+    ohe_cols = ohe.get_feature_names_out(['공종']).tolist()
+    new_cols = ohe_cols + num_cols
+    new_cols.remove('공종')
+    # DataFrame으로 변환
+
+    df = pd.DataFrame(X, columns=new_cols)
+
+    df = df.astype('float64')
+
+    # --------------------정제 완료 ----------------------------
+
+    X = df.drop(['사망자수(명)', '부상자수(명)', '피해규모', '공종별 위험도 평가지수'], axis=1)
+    y = df[['공종별 위험도 평가지수']]
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    return X_train, X_test, y_train, y_test
