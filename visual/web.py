@@ -5,4 +5,5 @@ st.write("""
 accident-data.
 """)
 
-window = st.slider("공정률")
+
+공정률 = st.slider("공정률")
