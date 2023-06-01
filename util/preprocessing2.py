@@ -3,6 +3,7 @@
 # 기온, 습도 이상치 판별 함수
 # 해당 날짜의 평균 기온, 평균 습도 반환 함수
 import pandas as pd
+import re
 
 # 년월일을 yyyymmdd형식의 8자리 수로 반환하는 함수
 def extract_yyyymmdd(s):
@@ -29,6 +30,31 @@ def extract_sago(s):
  '80억초과 90억이하' '30억초과 40억이하' '70억초과 80억이하' '500억초과 1000억이하'
  '400억초과 500억이하' '1000억초과 2000억이하' '60억초과 70억이하' '2000억초과' '1억이하'
  '''
+# 문자열 데이터를 중앙값으로 변환하는 함수
+def extract_cost1(data_str):
+    # 정규식을 사용하여 문자열에서 금액 범위를 추출합니다.
+    try:
+        range_pattern = r'(\d+억초과 \d+억이하)'
+        range_match = re.search(range_pattern, data_str)
+        if range_match:
+            # 금액 범위가 있는 경우
+            # 금액 범위를 문자열에서 추출하여, 최소값과 최대값을 계산합니다.
+            range_str = range_match.group(1)
+            range_values = range_str.split(' ')
+            min_value = int(range_values[0].replace('억초과', '')) * 100000000
+            max_value = int(range_values[1].replace('억이하', '')) * 100000000
+
+            # 최소값과 최대값을 더한 후 2로 나누어 중앙값을 계산합니다.
+            median_value = (min_value + max_value) / 2.0
+        else:
+            median_value = None
+    except:
+        # 금액 범위가 없는 경우
+        # 예외 처리를 하거나 None 값을 반환합니다.
+        median_value = None
+
+    # 중앙값을 반환합니다.
+    return median_value
 
 # 기온의 이상치를 판별하는 함수
 def is_normal_temper(temper):
