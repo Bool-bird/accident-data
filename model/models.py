@@ -5,7 +5,7 @@ import lightgbm as lgb
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
-from cleansing.data_cleansing import preprocess_data
+from cleansing.data_cleansing import preprocess_data, preprocess_data_only_construction_type
 import catboost as cb
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
