@@ -19,6 +19,7 @@ def preprocess_data():
 
     allColumns = df.columns
     params = ['발생일시','공공/민간 구분', '기상상태', '시설물 종류', '사망자수(명)', '부상자수(명)', '공사비', '공사기간', '공정률', '작업자수', '설계안전성검토', '공종']
+    # params = ['발생일시','공공/민간 구분', '기상상태', '시설물 종류', '사망자수(명)', '부상자수(명)', '공사비', '공사기간', '공정률', '작업자수', '설계안전성검토']
 
     df = df.drop(allColumns.drop(params), axis=1)
 
@@ -37,7 +38,8 @@ def preprocess_data():
     df['작업자수'] = df['작업자수'].apply(extract_population)
     df['공사비'] = df['공사비'].apply(extract_cost)
     safety_ratio_by_job = calculate_safety_ratios(df)
-    safety_ratio_by_job = safety_ratio_by_job.drop(['공종별 안전사고 발생 비율', '공종별 사망자 비율', '공종별 부상자 비율', '공종별 안전사고 발생강도 비율', '공종별 안전사고 발생 건수', '공종별 사망자수', '공종별 부상자수'], axis=1)
+    # safety_ratio_by_job = safety_ratio_by_job.drop(['공종별 안전사고 발생비율', '공종별 사망자 비율', '공종별 부상자 비율', '공종별 안전사고 발생강도 비율', '공종별 안전사고 발생 건수', '공종별 사망자수', '공종별 부상자수'], axis=1)
+    safety_ratio_by_job = safety_ratio_by_job.drop(['공종별 안전사고 발생비율', '공종별 사망자 비율', '공종별 부상자 비율', '공종별 안전사고 발생강도 비율', '공종별 안전사고 발생 건수', '공종별 사망자수', '공종별 부상자수', '공종별 안전사고 발생비율 위험도', '공종별 안전사고 발생강도 위험도'], axis=1)
     df = pd.merge(df, safety_ratio_by_job, on='공종', how='inner')
     df['피해규모'] = df.apply(calc_damage_scale, axis=1)
 
@@ -50,10 +52,14 @@ def preprocess_data():
     le = LabelEncoder()
     df['설계안전성검토'] = le.fit_transform(df['설계안전성검토'])
 
+    df = df.drop(['공종'], axis = 1)
     # 시설물 종류 특성을 원-핫 인코딩
 
+    # ct = ColumnTransformer([
+    # ('onehot', OneHotEncoder(sparse=False), ['시설물 종류', '공공/민간 구분', '날씨', '공종'])], remainder='passthrough'
+    # )
     ct = ColumnTransformer([
-    ('onehot', OneHotEncoder(sparse=False), ['시설물 종류', '공공/민간 구분', '날씨', '공종'])], remainder='passthrough'
+    ('onehot', OneHotEncoder(sparse=False), ['시설물 종류', '공공/민간 구분', '날씨'])], remainder='passthrough'
     )
     ct.fit(df)
     X = ct.transform(df)
@@ -61,12 +67,14 @@ def preprocess_data():
 
     num_cols = df.columns.tolist()
     ohe = ct.named_transformers_['onehot']
-    ohe_cols = ohe.get_feature_names_out(['시설물 종류', '공공/민간 구분', '날씨', '공종']).tolist()
+    # ohe_cols = ohe.get_feature_names_out(['시설물 종류', '공공/민간 구분', '날씨', '공종']).tolist()
+    ohe_cols = ohe.get_feature_names_out(['시설물 종류', '공공/민간 구분', '날씨']).tolist()
     new_cols = ohe_cols + num_cols
     new_cols.remove('시설물 종류')
     new_cols.remove('공공/민간 구분')
     new_cols.remove('날씨')
-    new_cols.remove('공종')
+    # new_cols.remove('공종')
+
     # DataFrame으로 변환
 
     df = pd.DataFrame(X, columns=new_cols)
