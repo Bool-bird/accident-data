@@ -1,5 +1,4 @@
-import re
-from dateutil import parser
+
 
 def parse_num_of_people(s):
     # '내국인 :0명외국인 :0명 내국인 :0명 외국인 :0명'와 같은 문자열을 처리하기 위해
