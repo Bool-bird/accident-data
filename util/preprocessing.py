@@ -200,3 +200,12 @@ def extract_middle_class(s):
     if(type(s) == float):
         return("없음")
     return s.split(' > ')[1]
+
+# 피해 규모를 상, 중, 하로 변환하는 함수
+def transform_damage_scale(value):
+    if value > 1:
+        return 2  # 상 (클래스 2)
+    elif value > 0.5:
+        return 1  # 중 (클래스 1)
+    else:
+        return 0  # 하 (클래스 0)

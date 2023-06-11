@@ -5,7 +5,7 @@ import lightgbm as lgb
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
-from cleansing.data_cleansing import preprocess_data, preprocess_data_only_construction_type
+from cleansing.data_cleansing import preprocess_data, preprocess_data_by_dmg_scale, preprocess_data_classification
 import catboost as cb
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
@@ -16,17 +16,18 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.svm import SVR
 import numpy as np
 
-X_train, X_test, y_train, y_test = preprocess_data()
-
-def LGBMmodel():
+def LGBMmodel(dmg_scale_criteria):
     # LightGBM 데이터셋으로 변환
+
+    X_train, X_test, y_train, y_test = preprocess_data_by_dmg_scale(dmg_scale_criteria)
+
     lgb_train = lgb.Dataset(X_train, label=y_train)
     lgb_eval = lgb.Dataset(X_test, label=y_test, reference=lgb_train)
 
     # LightGBM 모델 설정
     params = {
         'objective': 'regression',
-        'metric': ['rmse', 'mae'], # 'set' 대신 'list'로 변경
+        'metric': 'mse', # 'set' 대신 'list'로 변경
         'num_leaves': 31,
         'learning_rate': 0.05,
         'feature_fraction': 0.9,
@@ -48,9 +49,11 @@ def LGBMmodel():
     mse = mean_squared_error(y_test, y_pred_lgb)
     print("LightGBM MSE:", mse)
 
-    return y_pred_lgb
+    return bst
 
 def CatBoostModel():
+    X_train, X_test, y_train, y_test = preprocess_data()
+
     # CatBoost 데이터셋으로 변환
     cb_train = cb.Pool(X_train, label=y_train)
     cb_eval = cb.Pool(X_test, label=y_test)
@@ -77,6 +80,7 @@ def CatBoostModel():
     return y_pred_cb
 
 def LRModel():
+    X_train, X_test, y_train, y_test = preprocess_data()
     # 선형 회귀 모델 학습 및 예측
     lr = LinearRegression()
     lr.fit(X_train, y_train)
@@ -89,6 +93,7 @@ def LRModel():
     return lr_pred
 
 def RidgeModel():
+    X_train, X_test, y_train, y_test = preprocess_data()
     # Ridge 회귀 모델 학습 및 예측
     ridge = Ridge(alpha=1.0)
     ridge.fit(X_train, y_train)
@@ -101,6 +106,7 @@ def RidgeModel():
     return ridge_pred
 
 def LassoModel():
+    X_train, X_test, y_train, y_test = preprocess_data()
     # Lasso 회귀 모델 학습 및 예측
     lasso = Lasso(alpha=0.1)
     lasso.fit(X_train, y_train)
@@ -114,6 +120,7 @@ def LassoModel():
     return lasso_pred
 
 def EnetModel():
+    X_train, X_test, y_train, y_test = preprocess_data()
     # ElasticNet 회귀 모델 학습 및 예측
     enet = ElasticNet(alpha=0.1, l1_ratio=0.7)
     enet.fit(X_train, y_train)
@@ -126,6 +133,7 @@ def EnetModel():
     return enet_pred
 
 def DTreeModel():
+    X_train, X_test, y_train, y_test = preprocess_data()
     # 결정 트리 회귀 모델 학습 및 예측
     dt = DecisionTreeRegressor(max_depth=5, random_state=42)
     dt.fit(X_train, y_train)
@@ -138,6 +146,7 @@ def DTreeModel():
     return dt_pred
 
 def RandomForestModel():
+    X_train, X_test, y_train, y_test = preprocess_data()
     # 랜덤 포레스트 회귀 모델 학습 및 예측
     rf = RandomForestRegressor(n_estimators=100, max_depth=5, random_state=42)
     rf.fit(X_train, y_train)
@@ -150,6 +159,7 @@ def RandomForestModel():
     return rf_pred
 
 def K_FoldModel():
+    X_train, X_test, y_train, y_test = preprocess_data()
 
     # LightGBM 모델 설정
     params_lgb = {
@@ -257,3 +267,39 @@ def K_FoldModel():
         print('KF-MSE:', mean_squared_error(y_test, predictions))
         
         return predictions
+
+def LGBMmodel_classification():
+    X_train, X_test, y_train, y_test = preprocess_data_classification()
+
+    # 가중치 생성
+    weights_train = np.ones_like(y_train)  # 기본 가중치 1로 초기화
+    weights_train[y_train == 2] = 80  # 상에 대한 가중치를 10으로 설정
+
+    # LightGBM 데이터셋으로 변환
+    lgb_train = lgb.Dataset(X_train, label=y_train, weight=weights_train)
+    lgb_eval = lgb.Dataset(X_test, label=y_test, reference=lgb_train)
+
+    # LightGBM 모델 설정
+    params = {
+        'objective': 'multiclass',
+        'num_class': 3,  # 클래스 개수 (상, 중, 하)
+        'metric': 'multi_logloss',
+        'num_leaves': 31,
+        'learning_rate': 0.05,
+        'feature_fraction': 0.9,
+        'bagging_fraction': 0.8,
+        'bagging_freq': 5,
+        'max_depth': 6,
+        'min_child_weight': 0.1,
+        'verbosity': -1
+    }
+
+    # 모델 학습
+    num_round = 100
+    bst = lgb.train(params, lgb_train, num_round, valid_sets=[lgb_train, lgb_eval], early_stopping_rounds=10, verbose_eval=0)
+
+    # 모델 예측
+    y_pred_lgb = bst.predict(X_test, num_iteration=bst.best_iteration)
+    y_pred_lgb_class = np.argmax(y_pred_lgb, axis=1)  # 확률값에서 가장 큰 값의 인덱스로 클래스 예측
+
+    return bst
