@@ -1,2 +1,0 @@
-/Users/matmang/Documents/GitHub/bool-bird-project/cleansing/crawling.py:16: DeprecationWarning: executable_path has been deprecated, please pass in a Service object
-  driver = webdriver.Chrome('./chromedriver_mac_arm64/chromedriver', options=options)

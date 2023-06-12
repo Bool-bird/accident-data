@@ -153,6 +153,18 @@ def calc_damage_scale(df):
 
 import pandas as pd
 
+def assign_safety_grade(risk_index):
+    if risk_index >= 10:
+        return 1
+    elif risk_index >= 5:
+        return 2
+    elif risk_index >= 1:
+        return 3
+    elif risk_index > 0:
+        return 4
+    else:
+        return 5
+
 def calculate_safety_ratios(df):
     # 전체 안전사고 발생 건수
     total_accidents = len(df)
@@ -160,8 +172,9 @@ def calculate_safety_ratios(df):
     # 공종별 안전사고 발생 건수
     group_accidents = df.groupby('공종')['공종'].count().reset_index(name='공종별 안전사고 발생 건수')
     
-    # 공종별 안전사고 발생 비율
-    group_accidents['공종별 안전사고 발생 비율'] = group_accidents['공종별 안전사고 발생 건수'] / total_accidents * 100
+    # 공종별 안전사고 발생 비율 -> 위험도 평가지수로 변형
+    group_accidents['공종별 안전사고 발생비율'] = group_accidents['공종별 안전사고 발생 건수'] / total_accidents * 100
+    group_accidents['공종별 안전사고 발생비율 위험도'] = group_accidents['공종별 안전사고 발생비율'].apply(assign_safety_grade)
     
     # 공종별 사망자 비율
     group_fatalities = df.groupby('공종')['사망자수(명)'].sum().reset_index(name='공종별 사망자수')
@@ -171,19 +184,28 @@ def calculate_safety_ratios(df):
     group_injuries = df.groupby('공종')['부상자수(명)'].sum().reset_index(name='공종별 부상자수')
     group_injuries['공종별 부상자 비율'] = group_injuries['공종별 부상자수'] / group_injuries['공종별 부상자수'].sum() * 100
     
-    # 공종별 안전사고 발생강도 비율
+    # 공종별 안전사고 발생강도 비율 -> 위험도 평가지수로 변형
     group_accident_intensity = pd.merge(group_fatalities, group_injuries, on='공종')
     group_accident_intensity['공종별 안전사고 발생강도 비율'] = group_accident_intensity['공종별 사망자 비율'] * 3 + group_accident_intensity['공종별 부상자 비율']
-    
+    group_accident_intensity['공종별 안전사고 발생강도 위험도'] = group_accident_intensity['공종별 안전사고 발생강도 비율'].apply(assign_safety_grade)
+
     # 공종별 위험도 평가지수
     group_safety_index = pd.merge(group_accidents, group_accident_intensity, on='공종')
-    group_safety_index['공종별 위험도 평가지수'] = group_safety_index['공종별 안전사고 발생 비율'] + group_safety_index['공종별 안전사고 발생강도 비율']
+    group_safety_index['공종별 위험도 평가지수'] = group_safety_index['공종별 안전사고 발생비율 위험도'] * group_safety_index['공종별 안전사고 발생강도 위험도']
     
     return group_safety_index
-
 
 # 공종에서 중분류만 추출하는 함수
 def extract_middle_class(s):
     if(type(s) == float):
         return("없음")
     return s.split(' > ')[1]
+
+# 피해 규모를 상, 중, 하로 변환하는 함수
+def transform_damage_scale(value):
+    if value > 1:
+        return 2  # 상 (클래스 2)
+    elif value > 0.5:
+        return 1  # 중 (클래스 1)
+    else:
+        return 0  # 하 (클래스 0)
