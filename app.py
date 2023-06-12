@@ -72,9 +72,9 @@ df.loc[string + selected_category] = 1.0
 
 #(7) 설계안전성검토 (대상,비대상)
 with col1 :
-    selected_item2 = st.radio("설계안전성검토를 선택해주세요.", ("대상", "비대상"))
+    selected_safety = st.radio("설계안전성검토를 선택해주세요.", ("대상", "비대상"))
     st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
-if (selected_item2 == "대상"):
+if (selected_safety == "대상"):
     df.loc['설계안전성검토'] = 1.0
 
 #(8) 시설관리공사 (공공,민간)
@@ -156,9 +156,9 @@ root = tree.getroot()
 items = root.findall('.//item')
 
 found = False
+temp = 0
+humidity = 0
 
-temp=0
-humidity=0
 for item in items:
     category = item.find('category').text
     if category == 'T1H':  # 기온(category=T1H) 데이터 추출
@@ -203,44 +203,56 @@ from cleansing.data_cleansing import preprocess_data, preprocess_data_classifica
 import pandas as pd
 from dateutil import parser
 
+df['boolean'] = df['boolean'].astype('float64')
+df = df.squeeze()
+
 predicted_class, detail_risk  = predict(df)
 # return value는 predicted_class={상: 2, 중: 1, 하: 0}, detail_risk = numpy.float64입니당
 
 
-#------------아래는 출력-----------------
+#——————아래는 출력————————
 
 st.write(' ')
 button_clicked = st.button('위험도 예측 결과 확인') #통계페이지 이동하는 버튼
 if button_clicked:
+    detail_risk = detail_risk / 100
     color = detail_risk  # 색 부분의 비율 (0.0 ~ 1.0 사이의 값)
     if predicted_class==0:
         st.title(f"위험도는 \'하\' 입니다.")
         color_width = int(color * 90)  # 색 부분의 너비 계산
-        color_bar_style = f'background-color: #89BF6C; height: 8px; width: {color_width}%; display: inline-block;'
+        color_bar_style = f'background-color: #94D541; height: 8px; width: {color_width}%; display: inline-block;'
         green_bar_style = f'background-color: #E4F4CF; height: 8px; width: {90-color_width}%; display: inline-block;'
         yellow_bar_style = f'background-color: #FDEDD0; height: 8px; width: 5%; display: inline-block;'
         red_bar_style = f'background-color: #F2D0CD; height: 8px; width: 5%; display: inline-block;'
+        st.write(f"상세 위험도는 \' {int(color*100)} % \' 입니다.")
+        st.markdown(
+        f'<div style="{color_bar_style}"></div><div style="{green_bar_style}"></div><div style="{yellow_bar_style}"></div><div style="{red_bar_style}"></div>',
+        unsafe_allow_html=True)
     
     elif predicted_class==1:
         st.title(f"위험도는 \'중\' 입니다.")
         color_width = int(color * 90)  # 색 부분의 너비 계산
-        green_bar_style = f'background-color: #89BF6C; height: 8px; width: 5%; display: inline-block;'
-        color_bar_style = f'background-color: #F0BD6A; height: 8px; width: {color_width}%; display: inline-block;'
+        green_bar_style = f'background-color: #94D541; height: 8px; width: 5%; display: inline-block;'
+        color_bar_style = f'background-color: #F5B743; height: 8px; width: {color_width}%; display: inline-block;'
         yellow_bar_style = f'background-color: #FDEDD0; height: 8px; width: {90-color_width}%; display: inline-block;'
         red_bar_style = f'background-color: #F2D0CD; height: 8px; width: 5%; display: inline-block;'
+        st.write(f"상세 위험도는 \' {int(color*100)} % \' 입니다.")
+        st.markdown(
+        f'<div style="{green_bar_style}"></div><div style="{color_bar_style}"></div><div style="{yellow_bar_style}"></div><div style="{red_bar_style}"></div>',
+        unsafe_allow_html=True)
     
     elif predicted_class==2:
         st.title(f"위험도는 \'상\' 입니다.")
         color = color/2
         color_width = int(color * 90)  # 색 부분의 너비 계산
-        green_bar_style = f'background-color: #89BF6C; height: 8px; width: 5%; display: inline-block;'
-        yellow_bar_style = f'background-color: #F0BD6A; height: 8px; width: 5%; display: inline-block;'
-        color_bar_style = f'background-color: #DD5E65; height: 8px; width: {color_width}%; display: inline-block;'
+        green_bar_style = f'background-color: #94D541; height: 8px; width: 5%; display: inline-block;'
+        yellow_bar_style = f'background-color: #F5B743; height: 8px; width: 5%; display: inline-block;'
+        color_bar_style = f'background-color: #C64635; height: 8px; width: {color_width}%; display: inline-block;'
         red_bar_style = f'background-color: #F2D0CD; height: 8px; width: {90-color_width}%; display: inline-block;'
         color = color*2
-        
-    st.write(f"상세 위험도는 \' {int(color*100)} % \' 입니다.")
-    st.markdown(
+        st.write(f"상세 위험도는 \' {int(color*100)} % \' 입니다.")
+        st.markdown(
         f'<div style="{green_bar_style}"></div><div style="{yellow_bar_style}"></div><div style="{color_bar_style}"></div><div style="{red_bar_style}"></div>',
         unsafe_allow_html=True)
+    
     st.write(df)

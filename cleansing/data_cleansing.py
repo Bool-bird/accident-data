@@ -11,11 +11,14 @@ from util.preprocessing import *
 from imblearn.over_sampling import SMOTE, RandomOverSampler
 from imblearn.under_sampling import OneSidedSelection, EditedNearestNeighbours
 import re
+import os
 from dateutil import parser
 
+parent_directory = os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__)))
 
 def preprocess_data():
-    df = pd.read_csv('../data/output-v3.csv')
+    df = pd.read_csv(parent_directory + '/data/output-v3.csv')
     #필요 없는 특성 제거
 
     allColumns = df.columns
@@ -88,7 +91,7 @@ def preprocess_data():
     return X_train, X_test, y_train, y_test
 
 def preprocess_data_only_construction_type():
-    df = pd.read_csv('../data/output-v3.csv')
+    df = pd.read_csv(parent_directory + '/data/output-v3.csv')
     #필요 없는 특성 제거
 
     allColumns = df.columns
@@ -140,7 +143,7 @@ def preprocess_data_only_construction_type():
     return X_train, X_test, y_train, y_test
 
 def preprocess_data_classification():
-    df = pd.read_csv('../data/output-v3.csv')
+    df = pd.read_csv(parent_directory + '/data/output-v3.csv')
     #필요 없는 특성 제거
 
     allColumns = df.columns
@@ -213,7 +216,7 @@ def preprocess_data_classification():
     return X_train, X_test, y_train, y_test
 
 def preprocess_data_remove_feature():
-    df = pd.read_csv('../data/output-v2.csv')
+    df = pd.read_csv(parent_directory + '/data/output-v3.csv')
     #필요 없는 특성 제거
 
     allColumns = df.columns
@@ -277,7 +280,7 @@ def preprocess_data_remove_feature():
     return X_train, X_test, y_train, y_test
 
 def preprocess_data_by_dmg_scale(dmg_scale_criteria):
-    df = pd.read_csv('../data/output-v3.csv')
+    df = pd.read_csv(parent_directory + '/data/output-v3.csv')
     allColumns = df.columns
     params = ['발생일시','공공/민간 구분', '기상상태', '시설물 종류', '사망자수(명)', '부상자수(명)', '공사비', '공사기간', '공정률', '작업자수', '설계안전성검토', '공종']
 
