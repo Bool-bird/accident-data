@@ -80,10 +80,7 @@ def CatBoostModel():
     return y_pred_cb
 
 def LRModel():
-<<<<<<< HEAD
-=======
     X_train, X_test, y_train, y_test = preprocess_data()
->>>>>>> hetero-construction-type
     # 선형 회귀 모델 학습 및 예측
     lr = LinearRegression()
     lr.fit(X_train, y_train)
@@ -96,10 +93,7 @@ def LRModel():
     return lr_pred
 
 def RidgeModel():
-<<<<<<< HEAD
-=======
     X_train, X_test, y_train, y_test = preprocess_data()
->>>>>>> hetero-construction-type
     # Ridge 회귀 모델 학습 및 예측
     ridge = Ridge(alpha=1.0)
     ridge.fit(X_train, y_train)
@@ -112,10 +106,7 @@ def RidgeModel():
     return ridge_pred
 
 def LassoModel():
-<<<<<<< HEAD
-=======
     X_train, X_test, y_train, y_test = preprocess_data()
->>>>>>> hetero-construction-type
     # Lasso 회귀 모델 학습 및 예측
     lasso = Lasso(alpha=0.1)
     lasso.fit(X_train, y_train)
@@ -129,10 +120,7 @@ def LassoModel():
     return lasso_pred
 
 def EnetModel():
-<<<<<<< HEAD
-=======
     X_train, X_test, y_train, y_test = preprocess_data()
->>>>>>> hetero-construction-type
     # ElasticNet 회귀 모델 학습 및 예측
     enet = ElasticNet(alpha=0.1, l1_ratio=0.7)
     enet.fit(X_train, y_train)
@@ -145,10 +133,7 @@ def EnetModel():
     return enet_pred
 
 def DTreeModel():
-<<<<<<< HEAD
-=======
     X_train, X_test, y_train, y_test = preprocess_data()
->>>>>>> hetero-construction-type
     # 결정 트리 회귀 모델 학습 및 예측
     dt = DecisionTreeRegressor(max_depth=5, random_state=42)
     dt.fit(X_train, y_train)
@@ -161,10 +146,7 @@ def DTreeModel():
     return dt_pred
 
 def RandomForestModel():
-<<<<<<< HEAD
-=======
     X_train, X_test, y_train, y_test = preprocess_data()
->>>>>>> hetero-construction-type
     # 랜덤 포레스트 회귀 모델 학습 및 예측
     rf = RandomForestRegressor(n_estimators=100, max_depth=5, random_state=42)
     rf.fit(X_train, y_train)
@@ -177,10 +159,7 @@ def RandomForestModel():
     return rf_pred
 
 def K_FoldModel():
-<<<<<<< HEAD
-=======
     X_train, X_test, y_train, y_test = preprocess_data()
->>>>>>> hetero-construction-type
 
     # LightGBM 모델 설정
     params_lgb = {
@@ -287,9 +266,6 @@ def K_FoldModel():
 
         print('KF-MSE:', mean_squared_error(y_test, predictions))
         
-<<<<<<< HEAD
-        return predictions
-=======
         return predictions
 
 def LGBMmodel_classification():
@@ -327,4 +303,3 @@ def LGBMmodel_classification():
     y_pred_lgb_class = np.argmax(y_pred_lgb, axis=1)  # 확률값에서 가장 큰 값의 인덱스로 클래스 예측
 
     return bst
->>>>>>> hetero-construction-type

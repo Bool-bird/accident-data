@@ -11,10 +11,7 @@ from util.preprocessing import *
 from imblearn.over_sampling import SMOTE, RandomOverSampler
 from imblearn.under_sampling import OneSidedSelection, EditedNearestNeighbours
 import re
-<<<<<<< HEAD
-=======
 import os
->>>>>>> hetero-construction-type
 from dateutil import parser
 
 parent_directory = os.path.dirname(
@@ -44,11 +41,7 @@ def preprocess_data():
     df['작업자수'] = df['작업자수'].apply(extract_population)
     df['공사비'] = df['공사비'].apply(extract_cost)
     safety_ratio_by_job = calculate_safety_ratios(df)
-<<<<<<< HEAD
-    safety_ratio_by_job = safety_ratio_by_job.drop(['공종별 안전사고 발생 비율', '공종별 사망자 비율', '공종별 부상자 비율', '공종별 안전사고 발생강도 비율', '공종별 안전사고 발생 건수', '공종별 사망자수', '공종별 부상자수'], axis=1)
-=======
     safety_ratio_by_job = safety_ratio_by_job.drop(['공종별 안전사고 발생비율', '공종별 사망자 비율', '공종별 부상자 비율', '공종별 안전사고 발생강도 비율', '공종별 안전사고 발생 건수', '공종별 사망자수', '공종별 부상자수', '공종별 안전사고 발생비율 위험도', '공종별 안전사고 발생강도 위험도'], axis=1)
->>>>>>> hetero-construction-type
     df = pd.merge(df, safety_ratio_by_job, on='공종', how='inner')
     df['피해규모'] = df.apply(calc_damage_scale, axis=1)
     df['피해규모'] = df['피해규모'] / df['공종별 위험도 평가지수']
@@ -91,19 +84,12 @@ def preprocess_data():
     # --------------------정제 완료 ----------------------------
 
     X = df.drop(['사망자수(명)', '부상자수(명)', '피해규모', '공종별 위험도 평가지수'], axis=1)
-<<<<<<< HEAD
-    y = df[['공종별 위험도 평가지수']]
-=======
     y = df[['피해규모']]
->>>>>>> hetero-construction-type
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     return X_train, X_test, y_train, y_test
 
-<<<<<<< HEAD
-preprocess_data()
-=======
 def preprocess_data_only_construction_type():
     df = pd.read_csv(parent_directory + '/data/output-v3.csv')
     #필요 없는 특성 제거
@@ -373,4 +359,3 @@ def preprocess_data_by_dmg_scale(dmg_scale_criteria):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     return X_train, X_test, y_train, y_test
->>>>>>> hetero-construction-type
