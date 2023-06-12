@@ -303,15 +303,6 @@ def preprocess_data_by_dmg_scale(dmg_scale_criteria):
     df['피해규모'] = df.apply(calc_damage_scale, axis=1)
     df['피해규모'] = df['피해규모'] / df['공종별 위험도 평가지수']
 
-    if dmg_scale_criteria == "high":
-        df = df[df['피해규모'] > 1]
-    elif dmg_scale_criteria == "mid":
-        df = df[(df['피해규모'] <= 1) & (df['피해규모'] > 0.5)]
-    elif dmg_scale_criteria == "low":
-        df = df[df['피해규모'] <= 0.5]
-    else:
-        raise ValueError("Invalid damage scale criteria. Choose among 'high', 'mid', 'low'.")
-
     df['피해규모'] = np.log1p(df['피해규모'])
 
     # 기상 상태 컬럼 분리
@@ -347,6 +338,15 @@ def preprocess_data_by_dmg_scale(dmg_scale_criteria):
     df = df.astype('float64')
 
     df['습도'] = df['습도'].apply(lambda x: x/100)
+
+    if dmg_scale_criteria == "high":
+        df = df[df['피해규모'] > 1]
+    elif dmg_scale_criteria == "mid":
+        df = df[(df['피해규모'] <= 1) & (df['피해규모'] > 0.5)]
+    elif dmg_scale_criteria == "low":
+        df = df[df['피해규모'] <= 0.5]
+    else:
+        raise ValueError("Invalid damage scale criteria. Choose among 'high', 'mid', 'low'.")
 
     # --------------------정제 완료 ----------------------------
 

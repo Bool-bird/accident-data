@@ -23,9 +23,9 @@ def predict(input_data):
         detail_risk = (np.expm1(dmg_scale) - 1) * 100
     elif predicted_class == 1:  # 중
         dmg_scale = bst_regression_mid.predict(input_data)
-        detail_risk = (np.expm1(dmg_scale) - 0.5) * 100 * 2
+        detail_risk = (np.expm1(dmg_scale) - 0.5) * 100
     else:  # 하
         dmg_scale = bst_regression_low.predict(input_data)
-        detail_risk = (np.expm1(dmg_scale)) * 100 * 2
+        detail_risk = (np.expm1(dmg_scale)) * 100
 
     return predicted_class, detail_risk 
